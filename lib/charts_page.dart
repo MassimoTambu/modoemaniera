@@ -41,6 +41,26 @@ class SimpleBarChart extends StatelessWidget {
       child: charts.BarChart(
         seriesList,
         animate: animate,
+        domainAxis: charts.OrdinalAxisSpec(
+          renderSpec: new charts.SmallTickRendererSpec(
+            minimumPaddingBetweenLabelsPx: 30,
+            // Tick and Label styling here.
+            labelStyle: new charts.TextStyleSpec(
+              fontSize: 13, // size in Pts.
+              color: charts.MaterialPalette.black,
+            ),
+
+            // Change the line colors to match text color.
+            lineStyle:
+                new charts.LineStyleSpec(color: charts.MaterialPalette.black),
+          ),
+          viewport: new charts.OrdinalViewport('AePS', 3),
+        ),
+        behaviors: [
+          new charts.SeriesLegend(),
+          new charts.SlidingViewport(),
+          new charts.PanAndZoomBehavior(),
+        ],
       ),
     );
   }
@@ -52,7 +72,7 @@ class SimpleBarChart extends StatelessWidget {
 
     return [
       charts.Series<CounterChart, String>(
-        id: 'Sales',
+        id: 'Ripetizioni',
         colorFn: (_, __) => charts.MaterialPalette.yellow.shadeDefault,
         domainFn: (CounterChart sales, _) => sales.name,
         measureFn: (CounterChart sales, _) => sales.count,
