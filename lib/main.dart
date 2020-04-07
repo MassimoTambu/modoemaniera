@@ -47,10 +47,11 @@ class _NavigationMenuState extends State<NavigationMenu>
 
   @override
   void initState() {
+    _chartSelected = Chart.Torta;
     _widgetOptions = <Widget>[
       CountersPage(counters),
       HistoryPage(),
-      ChartsPage(),
+      ChartsPage(_chartSelected),
     ];
     _tabController = new TabController(vsync: this, length: 3);
     setFirstTab();
@@ -77,17 +78,17 @@ class _NavigationMenuState extends State<NavigationMenu>
                   child: Text('Torta'),
                 ),
                 const PopupMenuItem<Chart>(
-                  value: Chart.Coca,
-                  child: Text('Coca'),
+                  value: Chart.Barre,
+                  child: Text('Barre'),
                 ),
-                const PopupMenuItem<Chart>(
-                  value: Chart.Maiale,
-                  child: Text('Maiale'),
-                ),
-                const PopupMenuItem<Chart>(
-                  value: Chart.Mortaci,
-                  child: Text('Mortaci'),
-                ),
+                // const PopupMenuItem<Chart>(
+                //   value: Chart.Giornata,
+                //   child: Text('A giornate'),
+                // ),
+                // const PopupMenuItem<Chart>(
+                //   value: Chart.ParolaDellaGiornata,
+                //   child: Text('Top per giorno'),
+                // ),
               ],
             ),
           ];
@@ -113,7 +114,7 @@ class _NavigationMenuState extends State<NavigationMenu>
               _widgetOptions = [
                 CountersPage(counters),
                 HistoryPage(),
-                ChartsPage(),
+                ChartsPage(_chartSelected),
               ];
             });
           }
@@ -124,8 +125,14 @@ class _NavigationMenuState extends State<NavigationMenu>
   }
 
   void _onChartSelected(Chart c) {
+    _chartSelected = c;
+
     setState(() {
-      _chartSelected = c;
+      _widgetOptions = [
+        CountersPage(counters),
+        HistoryPage(),
+        ChartsPage(_chartSelected),
+      ];
     });
   }
 

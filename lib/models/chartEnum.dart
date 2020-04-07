@@ -1,1 +1,1 @@
-enum Chart { Torta, Maiale, Coca, Mortaci }
+enum Chart { Torta, Barre, Giornata, ParolaDellaGiornata }
