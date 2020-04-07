@@ -19,7 +19,10 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           accentColor: Colors.amber,
           appBarTheme: AppBarTheme(color: Colors.blue)),
-      home: const NavigationMenu(),
+      home: const DefaultTabController(
+        length: 3,
+        child: const NavigationMenu(),
+      ),
     );
   }
 }
@@ -31,11 +34,17 @@ class NavigationMenu extends StatefulWidget {
   const NavigationMenu();
 }
 
-class _NavigationMenuState extends State<NavigationMenu> {
+class _NavigationMenuState extends State<NavigationMenu>
+    with SingleTickerProviderStateMixin {
   List<Counter> counters = cList.counters;
   int _selectedIndex = 0;
   Chart _chartSelected;
   List<Widget> _widgetOptions;
+
+  Text _appBarTitle;
+  List<Widget> _appBarButton;
+  TabController _tabController;
+  FloatingActionButton _floatingActionButton;
 
   @override
   void initState() {
@@ -44,12 +53,69 @@ class _NavigationMenuState extends State<NavigationMenu> {
       HistoryPage(),
       ChartsPage(),
     ];
+    _tabController = new TabController(vsync: this, length: 3);
+    setFirstTab();
+    _tabController.addListener(() {
+      if (_tabController.index == 0) {
+        setFirstTab();
+      } else if (_tabController.index == 1) {
+        setState(() {
+          _appBarTitle = Text('Cronologia');
+          _appBarButton = null;
+          _floatingActionButton = null;
+        });
+      } else if (_tabController.index == 2) {
+        setState(() {
+          _appBarTitle = Text('Grafici');
+          _appBarButton = [
+            PopupMenuButton<Chart>(
+              onSelected: (Chart result) {
+                _onChartSelected(result);
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<Chart>>[
+                const PopupMenuItem<Chart>(
+                  value: Chart.Torta,
+                  child: Text('Torta'),
+                ),
+                const PopupMenuItem<Chart>(
+                  value: Chart.Coca,
+                  child: Text('Coca'),
+                ),
+                const PopupMenuItem<Chart>(
+                  value: Chart.Maiale,
+                  child: Text('Maiale'),
+                ),
+                const PopupMenuItem<Chart>(
+                  value: Chart.Mortaci,
+                  child: Text('Mortaci'),
+                ),
+              ],
+            ),
+          ];
+          _floatingActionButton = null;
+        });
+      }
+    });
     super.initState();
   }
 
-  void _onItemTapped(int index) {
+  void setFirstTab() {
     setState(() {
-      _selectedIndex = index;
+      _appBarTitle = Text('Lista Contatori');
+      _appBarButton = null;
+      _floatingActionButton = FloatingActionButton(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (BuildContext ctx) => CounterForm(),
+        ).then((result) {
+          if (result is Counter) {
+            setState(() {
+              counters.add(result);
+            });
+          }
+        }),
+        child: const Icon(Icons.add),
+      );
     });
   }
 
@@ -64,77 +130,36 @@ class _NavigationMenuState extends State<NavigationMenu> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text(
-          _selectedIndex == 0
-              ? 'Lista Contatori'
-              : _selectedIndex == 1 ? 'Cronologia' : 'Grafici',
-        ),
+        title: _appBarTitle,
         centerTitle: true,
-        actions: _selectedIndex == 2
-            ? <Widget>[
-                PopupMenuButton<Chart>(
-                  onSelected: (Chart result) {
-                    _onChartSelected(result);
-                  },
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<Chart>>[
-                    const PopupMenuItem<Chart>(
-                      value: Chart.Torta,
-                      child: Text('Torta'),
-                    ),
-                    const PopupMenuItem<Chart>(
-                      value: Chart.Coca,
-                      child: Text('Coca'),
-                    ),
-                    const PopupMenuItem<Chart>(
-                      value: Chart.Maiale,
-                      child: Text('Maiale'),
-                    ),
-                    const PopupMenuItem<Chart>(
-                      value: Chart.Mortaci,
-                      child: Text('Mortaci'),
-                    ),
-                  ],
-                ),
-              ]
-            : null,
+        actions: _appBarButton,
       ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      body: TabBarView(
+        controller: _tabController,
+        children: _widgetOptions,
       ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (BuildContext ctx) => CounterForm(),
-              ).then((result) {
-                if (result is Counter) {
-                  setState(() {
-                    counters.add(result);
-                  });
-                }
-              }),
-              child: const Icon(Icons.add),
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+      floatingActionButton: _floatingActionButton,
+      bottomNavigationBar: TabBar(
+        controller: _tabController,
+        tabs: [
+          Tab(
             icon: Icon(Icons.donut_small),
-            title: Text('Contatori'),
+            text: 'Contatori',
           ),
-          BottomNavigationBarItem(
+          Tab(
             icon: Icon(Icons.history),
-            title: Text('Cronologia'),
+            text: 'Cronologia',
           ),
-          BottomNavigationBarItem(
+          Tab(
             icon: Icon(Icons.insert_chart),
-            title: Text('Grafici'),
+            text: 'Grafici',
           ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
+        labelColor: Colors.amber[800],
+        unselectedLabelColor: Colors.blueGrey[100],
+        indicatorSize: TabBarIndicatorSize.label,
+        indicatorPadding: EdgeInsets.all(5.0),
+        indicatorColor: Colors.orange,
       ),
     );
   }
