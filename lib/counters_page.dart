@@ -11,15 +11,6 @@ class CountersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final inheritedListCounters = InheritedListCounters.of(context);
-    // return ListView.builder(
-    //   itemBuilder: (ctx, index) {
-    //     return CounterController(
-    //       counter: inheritedListCounters.counters[index],
-    //     );
-    //   },
-    //   itemCount: inheritedListCounters.counters.length,
-    // );
     return ListView.builder(
       itemBuilder: (ctx, index) {
         return CounterController(

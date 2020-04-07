@@ -37,7 +37,6 @@ class NavigationMenu extends StatefulWidget {
 class _NavigationMenuState extends State<NavigationMenu>
     with SingleTickerProviderStateMixin {
   List<Counter> counters = cList.counters;
-  int _selectedIndex = 0;
   Chart _chartSelected;
   List<Widget> _widgetOptions;
 
@@ -109,8 +108,13 @@ class _NavigationMenuState extends State<NavigationMenu>
           builder: (BuildContext ctx) => CounterForm(),
         ).then((result) {
           if (result is Counter) {
+            counters.add(result);
             setState(() {
-              counters.add(result);
+              _widgetOptions = [
+                CountersPage(counters),
+                HistoryPage(),
+                ChartsPage(),
+              ];
             });
           }
         }),
