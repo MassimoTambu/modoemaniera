@@ -56,7 +56,7 @@ class _CounterFormState extends State<CounterForm> {
                             if (_formKey.currentState.validate()) {
                               // Process data.
                               Navigator.of(context).pop(
-                                Counter(text, []),
+                                Counter(10, text, []),
                               );
                             }
                           },

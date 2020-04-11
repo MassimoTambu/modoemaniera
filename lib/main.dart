@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:modoemaniera/charts_page.dart';
 import 'package:modoemaniera/counter_form.dart';
 import 'package:modoemaniera/history_page.dart';
-import 'package:modoemaniera/models/counters.dart' as cList;
 import 'counters_page.dart';
+import 'database/db_conn.dart';
 import 'models/chartEnum.dart';
 import 'models/counters.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final DatabaseCreator databaseCreator = new DatabaseCreator();
+
   @override
   Widget build(BuildContext context) {
+    databaseCreator.initDatabase();
     return MaterialApp(
       title: 'Contatori Modo e Maniera',
       theme: ThemeData(
@@ -36,7 +39,9 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu>
     with SingleTickerProviderStateMixin {
-  List<Counter> counters = cList.counters;
+  final GlobalKey<CountersPageState> _globalKey =
+      GlobalKey<CountersPageState>();
+
   Chart _chartSelected;
   List<Widget> _widgetOptions;
 
@@ -49,7 +54,9 @@ class _NavigationMenuState extends State<NavigationMenu>
   void initState() {
     _chartSelected = Chart.Torta;
     _widgetOptions = <Widget>[
-      CountersPage(counters),
+      CountersPage(
+        key: _globalKey,
+      ),
       HistoryPage(),
       ChartsPage(_chartSelected),
     ];
@@ -107,15 +114,10 @@ class _NavigationMenuState extends State<NavigationMenu>
         onPressed: () => showDialog(
           context: context,
           builder: (BuildContext ctx) => CounterForm(),
-        ).then((result) {
+        ).then((result) async {
           if (result is Counter) {
-            counters.add(result);
-            setState(() {
-              _widgetOptions = [
-                CountersPage(counters),
-                HistoryPage(),
-                ChartsPage(_chartSelected),
-              ];
+            RepositoryServiceCounters.addCounter(result).then((_) {
+              _globalKey.currentState.updateCounterList();
             });
           }
         }),
@@ -129,7 +131,9 @@ class _NavigationMenuState extends State<NavigationMenu>
 
     setState(() {
       _widgetOptions = [
-        CountersPage(counters),
+        CountersPage(
+          key: _globalKey,
+        ),
         HistoryPage(),
         ChartsPage(_chartSelected),
       ];

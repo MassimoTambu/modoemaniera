@@ -1,23 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:holding_gesture/holding_gesture.dart';
-import 'package:modoemaniera/main.dart';
 
+import 'database/db_conn.dart';
 import 'models/counters.dart';
 
-class CountersPage extends StatelessWidget {
-  final List<Counter> counters;
+class CountersPage extends StatefulWidget {
+  const CountersPage({Key key}) : super(key: key);
 
-  CountersPage(this.counters);
+  @override
+  CountersPageState createState() => CountersPageState();
+}
+
+class CountersPageState extends State<CountersPage> {
+  Future<List<Counter>> future;
+
+  @override
+  void initState() {
+    if (DatabaseCreator.isConnected) {
+      future = RepositoryServiceCounters.getAllCounters();
+    } else {
+      future = Future.delayed(
+        Duration(seconds: 1),
+        () => RepositoryServiceCounters.getAllCounters(),
+      );
+    }
+    super.initState();
+  }
+
+  void updateCounterList() {
+    setState(() {
+      future = RepositoryServiceCounters.getAllCounters();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (ctx, index) {
-        return CounterController(
-          counter: counters[index],
-        );
-      },
-      itemCount: counters.length,
+    return Column(
+      children: <Widget>[
+        FutureBuilder(
+          future: future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Text(snapshot.error.toString());
+              }
+              if (snapshot.hasData) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemBuilder: (ctx, index) {
+                      return CounterController(
+                        counter: snapshot.data[index],
+                      );
+                    },
+                    itemCount: snapshot.data.length,
+                  ),
+                );
+              } else {
+                return Text('Questo messaggio non dovrebbe apparire .-.');
+              }
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
+        ),
+      ],
     );
   }
 }
@@ -46,7 +92,7 @@ class _CounterControllerState extends State<CounterController> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: <Widget>[
-          CounterElement(widget.counter.cName),
+          CounterElement(widget.counter.name),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -54,7 +100,7 @@ class _CounterControllerState extends State<CounterController> {
                 holdTimeout: Duration(milliseconds: 100),
                 onHold: () {
                   this.setState(
-                    () => counter.cDateHistory.add(
+                    () => counter.dateHistory.add(
                       DateTime.now(),
                     ),
                   );
@@ -63,7 +109,7 @@ class _CounterControllerState extends State<CounterController> {
                   icon: Icon(Icons.add),
                   onPressed: () {
                     this.setState(
-                      () => counter.cDateHistory.add(
+                      () => counter.dateHistory.add(
                         DateTime.now(),
                       ),
                     );
@@ -75,7 +121,7 @@ class _CounterControllerState extends State<CounterController> {
                 height: 20,
                 child: FittedBox(
                   child: Text(
-                    '${counter.cDateHistory.length}',
+                    '${counter.dateHistory.length}',
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -86,18 +132,18 @@ class _CounterControllerState extends State<CounterController> {
               HoldDetector(
                 holdTimeout: Duration(milliseconds: 100),
                 onHold: () {
-                  if (counter.cDateHistory.length != 0) {
+                  if (counter.dateHistory.length != 0) {
                     this.setState(
-                      () => counter.cDateHistory.removeLast(),
+                      () => counter.dateHistory.removeLast(),
                     );
                   }
                 },
                 child: IconButton(
                   icon: Icon(Icons.remove),
                   onPressed: () {
-                    if (counter.cDateHistory.length != 0) {
+                    if (counter.dateHistory.length != 0) {
                       this.setState(
-                        () => counter.cDateHistory.removeLast(),
+                        () => counter.dateHistory.removeLast(),
                       );
                     }
                   },

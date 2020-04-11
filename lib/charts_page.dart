@@ -85,7 +85,7 @@ class BarChart extends StatelessWidget {
 
   static List<charts.Series<CounterChart, String>> _createSampleData() {
     final data = counters.map((c) {
-      return CounterChart(c.cName, c.cDateHistory.length);
+      return CounterChart(c.name, c.dateHistory.length);
     }).toList();
 
     return [
@@ -127,7 +127,7 @@ class PieChart extends StatelessWidget {
 
   static List<charts.Series<CounterChart, String>> _createSampleData() {
     final data = counters.map((c) {
-      return CounterChart(c.cName, c.cDateHistory.length);
+      return CounterChart(c.name, c.dateHistory.length);
     }).toList();
 
     return [
