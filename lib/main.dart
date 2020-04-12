@@ -152,6 +152,7 @@ class _NavigationMenuState extends State<NavigationMenu>
       body: TabBarView(
         controller: _tabController,
         children: _widgetOptions,
+        physics: NeverScrollableScrollPhysics(),
       ),
       floatingActionButton: _floatingActionButton,
       bottomNavigationBar: TabBar(
