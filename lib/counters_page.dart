@@ -48,8 +48,14 @@ class CountersPageState extends State<CountersPage> {
                 return Expanded(
                   child: ListView.builder(
                     itemBuilder: (ctx, index) {
-                      return CounterController(
-                        counter: snapshot.data[index],
+                      return Column(
+                        children: <Widget>[
+                          if (index == 0) const SizedBox(height: 20),
+                          CounterController(
+                            counter: snapshot.data[index],
+                            updateCounterList: updateCounterList,
+                          ),
+                        ],
                       );
                     },
                     itemCount: snapshot.data.length,
@@ -69,9 +75,14 @@ class CountersPageState extends State<CountersPage> {
 }
 
 class CounterController extends StatefulWidget {
-  final Counter counter;
+  const CounterController({
+    Key key,
+    @required this.counter,
+    @required this.updateCounterList,
+  }) : super(key: key);
 
-  const CounterController({Key key, @required this.counter}) : super(key: key);
+  final Counter counter;
+  final Function updateCounterList;
 
   @override
   _CounterControllerState createState() => _CounterControllerState();
@@ -86,72 +97,96 @@ class _CounterControllerState extends State<CounterController> {
     counter = widget.counter;
   }
 
+  void onDismissCounter() {
+    setState(() {
+      RepositoryServiceCounters.deleteCounter(counter);
+    });
+    widget.updateCounterList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: <Widget>[
-          CounterElement(widget.counter.name),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              HoldDetector(
-                holdTimeout: Duration(milliseconds: 100),
-                onHold: () {
-                  this.setState(
-                    () => counter.dateHistory.add(
-                      DateTime.now(),
-                    ),
-                  );
-                },
-                child: IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
+    return Dismissible(
+      key: UniqueKey(),
+      background: Container(
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: const Align(
+          alignment: Alignment.centerRight,
+          child: const Icon(
+            Icons.delete_outline,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) => onDismissCounter(),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
+            CounterElement(widget.counter.name),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                HoldDetector(
+                  holdTimeout: Duration(milliseconds: 100),
+                  onHold: () {
                     this.setState(
                       () => counter.dateHistory.add(
                         DateTime.now(),
                       ),
                     );
                   },
-                ),
-              ),
-              Container(
-                width: 25,
-                height: 20,
-                child: FittedBox(
-                  child: Text(
-                    '${counter.dateHistory.length}',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      this.setState(
+                        () => counter.dateHistory.add(
+                          DateTime.now(),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-              HoldDetector(
-                holdTimeout: Duration(milliseconds: 100),
-                onHold: () {
-                  if (counter.dateHistory.length != 0) {
-                    this.setState(
-                      () => counter.dateHistory.removeLast(),
-                    );
-                  }
-                },
-                child: IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () {
+                Container(
+                  width: 25,
+                  height: 20,
+                  child: FittedBox(
+                    child: Text(
+                      '${counter.dateHistory.length}',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                HoldDetector(
+                  holdTimeout: Duration(milliseconds: 100),
+                  onHold: () {
                     if (counter.dateHistory.length != 0) {
                       this.setState(
                         () => counter.dateHistory.removeLast(),
                       );
                     }
                   },
+                  child: IconButton(
+                    icon: Icon(Icons.remove),
+                    onPressed: () {
+                      if (counter.dateHistory.length != 0) {
+                        this.setState(
+                          () => counter.dateHistory.removeLast(),
+                        );
+                      }
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
