@@ -119,12 +119,13 @@ class RepositoryServiceCounters {
     WHERE id = ${counter.id}
     ''';
     final result = await db.rawUpdate(sql);
-    DatabaseCreator.databaseLog('Delete Counter', sql, null, result);
+    DatabaseCreator.databaseLog('Update Counter', sql, null, result);
 
     final oldCounter = counters.firstWhere((c) {
       return c.id == counter.id;
     });
     final index = counters.indexOf(oldCounter);
+    counters.remove(counter);
     counters.insert(index, counter);
   }
 }

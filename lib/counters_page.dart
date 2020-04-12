@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:holding_gesture/holding_gesture.dart';
+import 'package:modoemaniera/counter_form.dart';
 
 import 'database/db_conn.dart';
 import 'models/counters.dart';
@@ -93,15 +94,37 @@ class _CounterControllerState extends State<CounterController> {
 
   @override
   void initState() {
-    super.initState();
     counter = widget.counter;
+    super.initState();
   }
 
-  void onDismissCounter() {
-    setState(() {
-      RepositoryServiceCounters.deleteCounter(counter);
-    });
-    widget.updateCounterList();
+  Future<bool> onEditCounter(DismissDirection direction) {
+    if (direction == DismissDirection.endToStart) {
+      showDialog(
+        context: context,
+        builder: (BuildContext ctx) => CounterForm(counter: counter),
+      ).then((result) async {
+        if (result is Counter) {
+          RepositoryServiceCounters.updateCounter(result);
+          widget.updateCounterList();
+        }
+      });
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
+  void onRemoveCounter(DismissDirection direction) {
+    if (direction == DismissDirection.startToEnd) {
+      setState(() {
+        RepositoryServiceCounters.deleteCounter(counter);
+      });
+      Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text(
+        "${counter.name} rimosso",
+      )));
+      widget.updateCounterList();
+    }
   }
 
   @override
@@ -109,19 +132,31 @@ class _CounterControllerState extends State<CounterController> {
     return Dismissible(
       key: UniqueKey(),
       background: Container(
-        padding: const EdgeInsets.only(right: 20),
+        padding: const EdgeInsets.only(left: 20),
         color: Colors.red,
         child: const Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment.centerLeft,
           child: const Icon(
-            Icons.delete_outline,
+            Icons.delete,
             color: Colors.white,
             size: 28,
           ),
         ),
       ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) => onDismissCounter(),
+      secondaryBackground: Container(
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.green,
+        child: const Align(
+          alignment: Alignment.centerRight,
+          child: const Icon(
+            Icons.edit,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
+      confirmDismiss: (direction) => onEditCounter(direction),
+      onDismissed: (direction) => onRemoveCounter(direction),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(

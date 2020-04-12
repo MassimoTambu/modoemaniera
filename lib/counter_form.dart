@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'models/counters.dart';
 
 class CounterForm extends StatefulWidget {
+  CounterForm({this.counter});
+
+  final Counter counter;
+
   @override
   _CounterFormState createState() => _CounterFormState();
 }
@@ -33,14 +37,17 @@ class _CounterFormState extends State<CounterForm> {
                 children: <Widget>[
                   TextFormField(
                     autofocus: true,
-                    decoration: InputDecoration(labelText: 'Counter Name'),
+                    decoration:
+                        InputDecoration(labelText: 'Nome del contatore'),
                     validator: (value) {
                       if (value.isEmpty) {
-                        return 'Please enter some text!';
+                        return 'Inserisci del testo';
                       }
                       text = value;
                       return null;
                     },
+                    initialValue:
+                        widget.counter != null ? widget.counter.name : text,
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
@@ -55,12 +62,22 @@ class _CounterFormState extends State<CounterForm> {
                             // the form is invalid.
                             if (_formKey.currentState.validate()) {
                               // Process data.
-                              Navigator.of(context).pop(
-                                Counter(10, text, []),
-                              );
+                              if (widget.counter != null) {
+                                Navigator.of(context).pop(
+                                  Counter(
+                                    widget.counter.id,
+                                    text,
+                                    widget.counter.dateHistory,
+                                  ),
+                                );
+                              } else {
+                                Navigator.of(context).pop(
+                                  Counter(10, text, []),
+                                );
+                              }
                             }
                           },
-                          child: Text('Submit'),
+                          child: Text('Conferma'),
                         ),
                       ],
                     ),
