@@ -202,6 +202,23 @@ class CounterController extends StatefulWidget {
 }
 
 class _CounterControllerState extends State<CounterController> {
+  void addDateHistory() async {
+    final dh = new DateTime.now();
+    await RepositoryServiceHistory.addDate(dh, widget.counter.id);
+    setState(() {
+      widget.counter.dateHistory.add(dh);
+    });
+  }
+
+  void removeLastDateHistory() async {
+    if (widget.counter.dateHistory.length != 0) {
+      await RepositoryServiceHistory.removeLastDate(widget.counter.id);
+      setState(() {
+        widget.counter.dateHistory.removeLast();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -209,29 +226,11 @@ class _CounterControllerState extends State<CounterController> {
       children: <Widget>[
         HoldDetector(
           holdTimeout: Duration(milliseconds: 100),
-          onTap: () {
-            setState(() {
-              widget.counter.dateHistory.add(
-                DateTime.now(),
-              );
-            });
-          },
-          onHold: () {
-            setState(() {
-              widget.counter.dateHistory.add(
-                DateTime.now(),
-              );
-            });
-          },
+          enableHapticFeedback: true,
+          onHold: () => addDateHistory(),
           child: IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {
-              setState(() {
-                widget.counter.dateHistory.add(
-                  DateTime.now(),
-                );
-              });
-            },
+            onPressed: () => addDateHistory(),
           ),
         ),
         Container(
@@ -249,22 +248,11 @@ class _CounterControllerState extends State<CounterController> {
         ),
         HoldDetector(
           holdTimeout: Duration(milliseconds: 100),
-          onHold: () {
-            if (widget.counter.dateHistory.length != 0) {
-              setState(() {
-                widget.counter.dateHistory.removeLast();
-              });
-            }
-          },
+          enableHapticFeedback: true,
+          onHold: () => removeLastDateHistory(),
           child: IconButton(
             icon: Icon(Icons.remove),
-            onPressed: () {
-              if (widget.counter.dateHistory.length != 0) {
-                setState(() {
-                  widget.counter.dateHistory.removeLast();
-                });
-              }
-            },
+            onPressed: () => removeLastDateHistory(),
           ),
         ),
       ],

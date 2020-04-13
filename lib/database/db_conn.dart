@@ -43,19 +43,26 @@ class DatabaseCreator {
     }
   }
 
-  Future<void> createCountersTable(Database db) async {
+  Future<void> createTables(Database db) async {
     final countersSql = '''
     CREATE TABLE ${CounterTable.tName}
     (
       ${CounterTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
       ${CounterTable.name} TEXT
-    );
+    )
+    ''';
+    await db.execute(countersSql);
+    final historySql = '''
     CREATE TABLE ${HistoryTable.tName}
     (
       ${HistoryTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
-      FOREIGN KEY(${HistoryTable.counterId}) REFERENCES ${CounterTable.tName}(${CounterTable.id})
+      ${HistoryTable.counterId} INTEGER,
       ${HistoryTable.date} TEXT,
-    );
+      FOREIGN KEY (${HistoryTable.counterId}) REFERENCES ${CounterTable.tName} (${CounterTable.id})
+    )
+    ''';
+    await db.execute(historySql);
+    final manieraSql = '''
     INSERT INTO ${CounterTable.tName}
     (
       ${CounterTable.name}
@@ -64,6 +71,9 @@ class DatabaseCreator {
     (
       "Maniera"
     )
+    ''';
+    await db.execute(manieraSql);
+    final modoemanieraSql = '''
     INSERT INTO ${CounterTable.tName}
     (
       ${CounterTable.name}
@@ -71,7 +81,11 @@ class DatabaseCreator {
     VALUES
     (
       "Modo e maniera"
-    )INSERT INTO ${CounterTable.tName}
+    )
+    ''';
+    await db.execute(modoemanieraSql);
+    final modoemanierataleSql = '''
+    INSERT INTO ${CounterTable.tName}
     (
       ${CounterTable.name}
     )
@@ -80,8 +94,7 @@ class DatabaseCreator {
       "Modo e maniera tale"
     )
     ''';
-
-    await db.execute(countersSql);
+    await db.execute(modoemanierataleSql);
   }
 
   Future<String> getDatabasePath(String dbName) async {
@@ -106,20 +119,28 @@ class DatabaseCreator {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    await createCountersTable(db);
+    await createTables(db);
   }
+
+  Future<void> deleteDatabase() async => databaseFactory.deleteDatabase(
+      join(await getDatabasesPath(), 'modoemaniera_database.db'));
 }
 
 class RepositoryServiceCounters {
   static Future<List<Counter>> getAllCounters() async {
-    final sql = '''SELECT * FROM ${CounterTable.tName}''';
-    final data = await db.rawQuery(sql);
+    final counterSql = '''SELECT * FROM ${CounterTable.tName}''';
+    final dataCounters = await db.rawQuery(counterSql);
+    final historySql = '''SELECT * FROM ${HistoryTable.tName}''';
+    final dataHistory = await db.rawQuery(historySql);
 
-    counters = List.generate(data.length, (i) {
+    counters = List.generate(dataCounters.length, (i) {
       return Counter(
-        data[i]['id'],
-        data[i]['name'],
-        [DateTime.now()],
+        dataCounters[i]['id'],
+        dataCounters[i]['name'],
+        dataHistory
+            .where((dh) => dh['counterId'] == dataCounters[i]['id'])
+            .map((dh) => DateTime.parse(dh['date']))
+            .toList(),
       );
     });
 
@@ -170,7 +191,8 @@ class RepositoryServiceCounters {
 
 class RepositoryServiceHistory {
   static Future<void> addDate(DateTime date, int counterId) async {
-    final sql = '''INSERT INTO ${HistoryTable.tName}
+    final sql = '''
+    INSERT INTO ${HistoryTable.tName}
     (
       ${HistoryTable.date},
       ${HistoryTable.counterId}
@@ -184,13 +206,30 @@ class RepositoryServiceHistory {
     final result = await db.rawInsert(sql);
     DatabaseCreator.databaseLog('Add Date History', sql, null, result);
 
-    Counter _c = counters.firstWhere((c) {
-      return c.id == counterId;
-    });
-    int index = counters.indexOf(_c);
-    counters[index].dateHistory.add(date);
+    // Counter _c = counters.firstWhere((c) {
+    //   return c.id == counterId;
+    // });
+    // int index = counters.indexOf(_c);
+    // counters[index].dateHistory.add(date);
+  }
+
+  static Future<void> removeLastDate(int counterId) async {
+    final sql = '''
+    DELETE FROM ${HistoryTable.tName}
+    WHERE ${HistoryTable.counterId} =
+    (
+      SELECT MAX(${HistoryTable.id})
+      FROM ${HistoryTable.tName}
+      WHERE ${HistoryTable.counterId} = $counterId
+    )
+    ''';
+    final result = await db.rawDelete(sql);
+    DatabaseCreator.databaseLog('Remove last Date History', sql, null, result);
+
+    // Counter _c = counters.firstWhere((c) {
+    //   return c.id == counterId;
+    // });
+    // int index = counters.indexOf(_c);
+    // counters[index].dateHistory.add(date);
   }
 }
-
-Future<void> deleteDatabase() async => databaseFactory
-    .deleteDatabase(join(await getDatabasesPath(), 'modoemaniera_database.db'));

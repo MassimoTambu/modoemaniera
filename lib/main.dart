@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // databaseCreator.deleteDatabase();
     databaseCreator.initDatabase();
     return MaterialApp(
       title: 'Contatori Modo e Maniera',
