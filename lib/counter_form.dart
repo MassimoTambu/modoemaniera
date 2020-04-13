@@ -72,7 +72,7 @@ class _CounterFormState extends State<CounterForm> {
                                 );
                               } else {
                                 Navigator.of(context).pop(
-                                  Counter(10, text, []),
+                                  Counter(-1, text, []),
                                 );
                               }
                             }

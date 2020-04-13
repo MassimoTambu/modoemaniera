@@ -52,7 +52,7 @@ class CountersPageState extends State<CountersPage> {
                       return Column(
                         children: <Widget>[
                           if (index == 0) const SizedBox(height: 20),
-                          CounterController(
+                          CounterElement(
                             counter: snapshot.data[index],
                             updateCounterList: updateCounterList,
                           ),
@@ -75,8 +75,8 @@ class CountersPageState extends State<CountersPage> {
   }
 }
 
-class CounterController extends StatefulWidget {
-  const CounterController({
+class CounterElement extends StatefulWidget {
+  const CounterElement({
     Key key,
     @required this.counter,
     @required this.updateCounterList,
@@ -86,10 +86,10 @@ class CounterController extends StatefulWidget {
   final Function updateCounterList;
 
   @override
-  _CounterControllerState createState() => _CounterControllerState();
+  _CounterElementState createState() => _CounterElementState();
 }
 
-class _CounterControllerState extends State<CounterController> {
+class _CounterElementState extends State<CounterElement> {
   Counter counter;
 
   @override
@@ -119,10 +119,13 @@ class _CounterControllerState extends State<CounterController> {
       setState(() {
         RepositoryServiceCounters.deleteCounter(counter);
       });
-      Scaffold.of(context).showSnackBar(SnackBar(
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
           content: Text(
-        "${counter.name} rimosso",
-      )));
+            "${counter.name} rimosso",
+          ),
+        ),
+      );
       widget.updateCounterList();
     }
   }
@@ -161,65 +164,8 @@ class _CounterControllerState extends State<CounterController> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: <Widget>[
-            CounterElement(widget.counter.name),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                HoldDetector(
-                  holdTimeout: Duration(milliseconds: 100),
-                  onHold: () {
-                    this.setState(
-                      () => counter.dateHistory.add(
-                        DateTime.now(),
-                      ),
-                    );
-                  },
-                  child: IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: () {
-                      this.setState(
-                        () => counter.dateHistory.add(
-                          DateTime.now(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  width: 25,
-                  height: 20,
-                  child: FittedBox(
-                    child: Text(
-                      '${counter.dateHistory.length}',
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                HoldDetector(
-                  holdTimeout: Duration(milliseconds: 100),
-                  onHold: () {
-                    if (counter.dateHistory.length != 0) {
-                      this.setState(
-                        () => counter.dateHistory.removeLast(),
-                      );
-                    }
-                  },
-                  child: IconButton(
-                    icon: Icon(Icons.remove),
-                    onPressed: () {
-                      if (counter.dateHistory.length != 0) {
-                        this.setState(
-                          () => counter.dateHistory.removeLast(),
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+            CounterLabel(widget.counter.name),
+            CounterController(counter: counter),
           ],
         ),
       ),
@@ -227,10 +173,10 @@ class _CounterControllerState extends State<CounterController> {
   }
 }
 
-class CounterElement extends StatelessWidget {
+class CounterLabel extends StatelessWidget {
   final counter;
 
-  const CounterElement(this.counter);
+  const CounterLabel(this.counter);
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +185,89 @@ class CounterElement extends StatelessWidget {
       style: TextStyle(
         fontSize: 18,
       ),
+    );
+  }
+}
+
+class CounterController extends StatefulWidget {
+  const CounterController({
+    Key key,
+    @required this.counter,
+  }) : super(key: key);
+
+  final Counter counter;
+
+  @override
+  _CounterControllerState createState() => _CounterControllerState();
+}
+
+class _CounterControllerState extends State<CounterController> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        HoldDetector(
+          holdTimeout: Duration(milliseconds: 100),
+          onTap: () {
+            setState(() {
+              widget.counter.dateHistory.add(
+                DateTime.now(),
+              );
+            });
+          },
+          onHold: () {
+            setState(() {
+              widget.counter.dateHistory.add(
+                DateTime.now(),
+              );
+            });
+          },
+          child: IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              setState(() {
+                widget.counter.dateHistory.add(
+                  DateTime.now(),
+                );
+              });
+            },
+          ),
+        ),
+        Container(
+          width: 25,
+          height: 20,
+          child: FittedBox(
+            child: Text(
+              '${widget.counter.dateHistory.length}',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        HoldDetector(
+          holdTimeout: Duration(milliseconds: 100),
+          onHold: () {
+            if (widget.counter.dateHistory.length != 0) {
+              setState(() {
+                widget.counter.dateHistory.removeLast();
+              });
+            }
+          },
+          child: IconButton(
+            icon: Icon(Icons.remove),
+            onPressed: () {
+              if (widget.counter.dateHistory.length != 0) {
+                setState(() {
+                  widget.counter.dateHistory.removeLast();
+                });
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }

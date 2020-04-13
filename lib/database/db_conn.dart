@@ -19,6 +19,13 @@ class CounterTable {
   static const name = 'name';
 }
 
+class HistoryTable {
+  static const tName = 'history';
+  static const id = 'id';
+  static const counterId = 'counterId';
+  static const date = 'date';
+}
+
 class DatabaseCreator {
   static bool isConnected = false;
   static const dbName = 'modoemaniera_database.db';
@@ -37,11 +44,42 @@ class DatabaseCreator {
   }
 
   Future<void> createCountersTable(Database db) async {
-    final countersSql = '''CREATE TABLE ${CounterTable.tName}
+    final countersSql = '''
+    CREATE TABLE ${CounterTable.tName}
     (
       ${CounterTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
       ${CounterTable.name} TEXT
-    )''';
+    );
+    CREATE TABLE ${HistoryTable.tName}
+    (
+      ${HistoryTable.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+      FOREIGN KEY(${HistoryTable.counterId}) REFERENCES ${CounterTable.tName}(${CounterTable.id})
+      ${HistoryTable.date} TEXT,
+    );
+    INSERT INTO ${CounterTable.tName}
+    (
+      ${CounterTable.name}
+    )
+    VALUES
+    (
+      "Maniera"
+    )
+    INSERT INTO ${CounterTable.tName}
+    (
+      ${CounterTable.name}
+    )
+    VALUES
+    (
+      "Modo e maniera"
+    )INSERT INTO ${CounterTable.tName}
+    (
+      ${CounterTable.name}
+    )
+    VALUES
+    (
+      "Modo e maniera tale"
+    )
+    ''';
 
     await db.execute(countersSql);
   }
@@ -60,7 +98,7 @@ class DatabaseCreator {
 
   Future<void> initDatabase() async {
     final path = await getDatabasePath(dbName);
-    openDatabase(path, version: 1, onCreate: _onCreate).then((_db) {
+    openDatabase(path, version: 2, onCreate: _onCreate).then((_db) {
       db = _db;
       print(db);
       isConnected = true;
@@ -127,6 +165,30 @@ class RepositoryServiceCounters {
     final index = counters.indexOf(oldCounter);
     counters.remove(counter);
     counters.insert(index, counter);
+  }
+}
+
+class RepositoryServiceHistory {
+  static Future<void> addDate(DateTime date, int counterId) async {
+    final sql = '''INSERT INTO ${HistoryTable.tName}
+    (
+      ${HistoryTable.date},
+      ${HistoryTable.counterId}
+    )
+    VALUES
+    (
+      "${date.toString()}",
+      "$counterId"
+    )
+    ''';
+    final result = await db.rawInsert(sql);
+    DatabaseCreator.databaseLog('Add Date History', sql, null, result);
+
+    Counter _c = counters.firstWhere((c) {
+      return c.id == counterId;
+    });
+    int index = counters.indexOf(_c);
+    counters[index].dateHistory.add(date);
   }
 }
 
