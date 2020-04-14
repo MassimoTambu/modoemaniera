@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:holding_gesture/holding_gesture.dart';
-import 'package:modoemaniera/counter_form.dart';
+import 'package:modoemanierapp/counter_form.dart';
 
 import 'database/db_conn.dart';
 import 'models/counters.dart';

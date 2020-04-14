@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:modoemaniera/charts_page.dart';
-import 'package:modoemaniera/counter_form.dart';
-import 'package:modoemaniera/history_page.dart';
+import 'package:modoemanierapp/charts_page.dart';
+import 'package:modoemanierapp/counter_form.dart';
+import 'package:modoemanierapp/history_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'counters_page.dart';
 import 'database/db_conn.dart';

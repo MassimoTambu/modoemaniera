@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:modoemaniera/models/datesList.dart';
+import 'package:modoemanierapp/models/datesList.dart';
 
 import 'models/counters.dart';
 

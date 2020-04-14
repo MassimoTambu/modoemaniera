@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:modoemaniera/models/counters.dart';
+import 'package:modoemanierapp/models/counters.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
