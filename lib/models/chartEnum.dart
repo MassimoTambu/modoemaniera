@@ -1,1 +1,1 @@
-enum Chart { Torta, Barre, Giornata, ParolaDellaGiornata }
+enum Chart { Torta, Barre, Giornata }

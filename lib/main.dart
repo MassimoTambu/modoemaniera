@@ -91,14 +91,10 @@ class _NavigationMenuState extends State<NavigationMenu>
                   value: Chart.Barre,
                   child: Text('Barre'),
                 ),
-                // const PopupMenuItem<Chart>(
-                //   value: Chart.Giornata,
-                //   child: Text('A giornate'),
-                // ),
-                // const PopupMenuItem<Chart>(
-                //   value: Chart.ParolaDellaGiornata,
-                //   child: Text('Top per giorno'),
-                // ),
+                const PopupMenuItem<Chart>(
+                  value: Chart.Giornata,
+                  child: Text('A giornate'),
+                ),
               ],
             ),
           ];
