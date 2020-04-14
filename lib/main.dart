@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:modoemaniera/charts_page.dart';
 import 'package:modoemaniera/counter_form.dart';
 import 'package:modoemaniera/history_page.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'counters_page.dart';
 import 'database/db_conn.dart';
 import 'models/chartEnum.dart';
@@ -53,6 +54,7 @@ class _NavigationMenuState extends State<NavigationMenu>
 
   @override
   void initState() {
+    initializeDateFormatting("it_IT", null);
     _chartSelected = Chart.Torta;
     _widgetOptions = <Widget>[
       CountersPage(

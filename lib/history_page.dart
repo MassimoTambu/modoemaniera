@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:modoemaniera/models/datesList.dart';
 
+import 'models/counters.dart';
+
 class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    dates = [];
+    counters.forEach((c) {
+      c.dateHistory.forEach((dh) {
+        dates.add({'name': c.name, 'date': dh});
+      });
+    });
+
     dates.sort(
-      (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime),
+      (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
     );
     return ListView.builder(
       itemBuilder: (ctx, index) {
@@ -40,9 +49,9 @@ class CounterHistory extends StatelessWidget {
           style: Theme.of(context).textTheme.title,
         ),
         subtitle: Text(
-          '${DateFormat.yMd().format(date)}',
+          '${DateFormat.yMMMMd('it').format(date)}',
         ),
-        trailing: Text('${DateFormat.Hms().format(date)}'),
+        trailing: Text('${DateFormat.Hms('it').format(date)}'),
       ),
     );
   }
