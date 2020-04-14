@@ -205,31 +205,21 @@ class RepositoryServiceHistory {
     ''';
     final result = await db.rawInsert(sql);
     DatabaseCreator.databaseLog('Add Date History', sql, null, result);
-
-    // Counter _c = counters.firstWhere((c) {
-    //   return c.id == counterId;
-    // });
-    // int index = counters.indexOf(_c);
-    // counters[index].dateHistory.add(date);
   }
 
   static Future<void> removeLastDate(int counterId) async {
-    final sql = '''
-    DELETE FROM ${HistoryTable.tName}
-    WHERE ${HistoryTable.counterId} =
-    (
-      SELECT MAX(${HistoryTable.id})
+    final maxSql = '''
+    SELECT MAX(${HistoryTable.id})
       FROM ${HistoryTable.tName}
       WHERE ${HistoryTable.counterId} = $counterId
-    )
+    ''';
+    final max = (await db.rawQuery(maxSql)).first['MAX(id)'];
+
+    final sql = '''
+    DELETE FROM ${HistoryTable.tName}
+    WHERE ${HistoryTable.id} = $max
     ''';
     final result = await db.rawDelete(sql);
     DatabaseCreator.databaseLog('Remove last Date History', sql, null, result);
-
-    // Counter _c = counters.firstWhere((c) {
-    //   return c.id == counterId;
-    // });
-    // int index = counters.indexOf(_c);
-    // counters[index].dateHistory.add(date);
   }
 }
